@@ -1,4 +1,6 @@
 let ladybugX; //Ladybugs horizontal position
+let ladybugY; //Ladybugs vertical position
+let moveSpeed = 3; //Pixels moved perfram when key is held down
 let wiggle = 0; //Used to animate legs and antennae
  
 //Array for drawing/updating clouds
@@ -12,11 +14,18 @@ let leafX = -50;
 let leafSpeed = 2.2;
  
 let sunRayAngle = 0;
+
+let timeState = 0; //0 = day, 1 = sunset, 2 = night
+
+function mousePressed() {
+  timeState = (timeState + 1) % 3; //Cycle through day, sunset, night
+}
  
 //This creates a canvas that is responsive to your browser screen size. This part defines the size
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  ladybugX = -100; //Starts ladybug off screen to the left
+  ladybugX = windowWidth / 2;
+  ladybugY = windowHeight / 2;
 }
 
 //This part resizes the canvas
@@ -25,8 +34,34 @@ function windowResized() {
 }
  
 function draw() {
-  //Sky
-  background(135, 206, 235);
+  let skyColor, sunColor, showRays, showStars;
+  if (timeState === 0){
+    skyColor = color(135, 206, 235); //Day sky
+    sunColor = color(255, 221, 89);
+    showRays = true;
+    showStars = false;
+  } else if (timeState === 1){
+    skyColor = color(255, 140, 90); //Sunset sky
+    sunColor = color(255, 100, 60);
+    showRays = true;
+    showStars = false;
+  } else {
+    skyColor = color(10, 10, 40); //Night sky
+    sunColor = color(225, 221, 235);
+    showRays = false;
+    showStars = true;
+  }
+  background(skyColor);
+
+  if (showStars) {
+    fill(255);
+    noStroke();
+    let starPositions = [[0.1, 0.1], [0.25, 0.3], [0.4, 0.15], [0.6, 0.25], [0.75, 0.1],
+  [0.9, 0.3], [0.5, 0.05]];
+    for (let s of starPositions) {
+      ellipse(s[0] * width, s[1] * height, 3, 3);
+    }
+  }
  
   //Sun
   let sunX = width * 0.85;
@@ -34,23 +69,25 @@ function draw() {
  
   sunRayAngle += 0.01;
  
-  push();
-  translate(sunX, sunY);
-  rotate(sunRayAngle);
-  stroke(255, 221, 89); //Sun rays
-  strokeWeight(4);
-  let rayCount = 8;
-  for (let i = 0; i < rayCount; i++) {
-    let angle = (TWO_PI / rayCount) * i;  //Even spaces the rays around the sun
-    let x1 = cos(angle) * 60;
-    let y1 = sin(angle) * 60;
-    let x2 = cos(angle) * 80;
-    let y2 = sin(angle) * 80;
-    line(x1, y1, x2, y2);
+  if (showRays) {
+    push();
+    translate(sunX, sunY);
+    rotate(sunRayAngle);
+    stroke(sunColor); //Sun rays
+    strokeWeight(4);
+    let rayCount = 8;
+    for (let i = 0; i < rayCount; i++) {
+      let angle = (TWO_PI / rayCount) * i;  //Even spaces the rays around the sun
+      let x1 = cos(angle) * 60;
+      let y1 = sin(angle) * 60;
+      let x2 = cos(angle) * 80;
+      let y2 = sin(angle) * 80;
+      line(x1, y1, x2, y2);
+    }
+    pop();
   }
-  pop();
- 
-  fill(255, 221, 89);
+
+  fill(sunColor);
   noStroke();
   ellipse(sunX, sunY, 100, 100);
  
@@ -83,15 +120,20 @@ function draw() {
     drawFlower(fx, height * 0.78);
   }
  
-  //Ladybug walking motion
-  ladybugX += 1.5;
-  if (ladybugX > width + 100) {
-    ladybugX = -100;
+  if (keyIsDown(87)) {
+    ladybugY -= moveSpeed; //W key moves up
+  } else if (keyIsDown(83)) {
+    ladybugY += moveSpeed; //S key moves down
+  } else if (keyIsDown(65)) {
+    ladybugX -= moveSpeed; //A key moves left
+  } else if (keyIsDown(68)) {
+    ladybugX += moveSpeed; //D key moves right
   }
+
   wiggle = sin(frameCount * 0.2) * 6;
  
   push();
-  translate(ladybugX, height / 2);
+  translate(ladybugX, ladybugY);
  
   //Legs
   stroke(20);
