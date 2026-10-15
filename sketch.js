@@ -114,6 +114,16 @@ function draw() {
   noStroke();
   rect(0, height * 0.75, width, height * 0.25);
  
+  //Grass
+  let grassX = 0;
+  stroke(50, 120, 60);
+  strokeWeight(2);
+  while (grassX < width) {
+    line(grassX, height * 0.75, grassX + 3, height * 0.75 - 12);
+    grassX += 12;
+  }
+  noStroke();
+
   //Flowers
   let flowerXs = [width * 0.15, width * 0.35, width * 0.65, width * 0.85];
   for (let fx of flowerXs) {
